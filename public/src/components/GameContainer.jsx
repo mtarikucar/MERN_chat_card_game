@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import ChatInput from "./ChatInput";
-import Logout from "./Logout";
-import { v4 as uuidv4 } from "uuid";
+import CardContainer from "./CardContainer";
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
+import Confessions from "./Confessions";
 
-export default function ChatContainer({ room, socket, setConfessions }) {
+export default function GameContainer({ room, socket }) {
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
@@ -40,31 +39,6 @@ export default function ChatContainer({ room, socket, setConfessions }) {
       from: data._id,
       room: data.room,
       message: msg,
-      isConfession: false
-    });
-
-    const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
-    setMessages(msgs);
-  };
-
-  const handleSendConfession = async (msg) => {
-    console.log("bu bir itiraf");
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-
-    socket.current.emit("send-msg", {
-      room: room,
-      from: data._id,
-      msg,
-    });
-
-    await axios.post(sendMessageRoute, {
-      from: data._id,
-      room: data.room,
-      message: msg,
-      isConfession: true
     });
 
     const msgs = [...messages];
@@ -91,40 +65,15 @@ export default function ChatContainer({ room, socket, setConfessions }) {
 
   return (
     <Container>
-      <div className="chat-header">
-        <div className="user-details">
-
-          <div className="username">
-            <h3>{room}</h3>
-          </div>
-        </div>
-        <Logout />
-      </div>
-      <div className="chat-messages">
-        {messages.map((message) => {
-          return (
-            <div ref={scrollRef} key={uuidv4()}>
-              <div
-                className={`message ${
-                  message.fromSelf ? "sended" : "recieved"
-                }`}
-              >
-                <div className="content ">
-                  <p>{message.message}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <ChatInput handleSendMsg={handleSendMsg} handleSendConfession={handleSendConfession}/>
+      <CardContainer room={room} socket={socket} />
+      <Confessions  room={room} socket={socket}/>
     </Container>
   );
 }
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 10% 80% 10%;
+  grid-template-rows: 40% 60%;
   border-radius:0.5rem;
   gap: 0.1rem;
   overflow: hidden;

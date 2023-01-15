@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import styled from "styled-components";
-import { allUsersRoute, host } from "../utils/APIRoutes";
+import { host } from "../utils/APIRoutes";
 import ChatContainer from "../components/ChatContainer";
 import Welcome from "../components/Welcome";
+import GameContainer from "../components/GameContainer";
 
 export default function Chat() {
   const navigate = useNavigate();
   const socket = useRef();
+  const [confessions,setConfessions] = useState([])
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
   useEffect(async () => {
@@ -31,9 +32,6 @@ export default function Chat() {
     }
   }, [currentUser]);
 
-  const handleChatChange = (chat) => {
-    setCurrentChat(chat);
-  };
   return (
     <>
       <Container>
@@ -41,7 +39,10 @@ export default function Chat() {
           {currentChat === undefined ? (
             <Welcome setCurrentChat={setCurrentChat} />
           ) : (
-            <ChatContainer currentChat={currentChat} socket={socket} />
+            <>
+              <ChatContainer room={currentChat} setConfessions={setConfessions} socket={socket} />
+              <GameContainer room={currentChat} socket={socket} />
+            </>
           )}
         </div>
       </Container>
@@ -62,11 +63,11 @@ const Container = styled.div`
     border-radius: 2rem;
     height: 85vh;
     width: 85vw;
-    
+    grid-template-columns: 50% 50%;
     @media screen and (min-width: 0px) and (max-width: 720px) {
       height: 100vh;
       width: 100vw;
-      border-radius:0rem;
+      border-radius: 0rem;
     }
     background-color: #00000076;
     display: grid;

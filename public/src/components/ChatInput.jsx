@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-
+import {FaUserSecret} from "react-icons/fa"
 import { BsEmojiSmile } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
 
-export default function ChatInput({ handleSendMsg }) {
+export default function ChatInput({ handleSendMsg, handleSendConfession }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const handleEmojiPickerhideShow = () => {
@@ -26,6 +26,14 @@ export default function ChatInput({ handleSendMsg }) {
     }
   };
 
+  const sendConfession = (e) =>{
+    e.preventDefault()
+    if (msg.length > 0) {
+      handleSendConfession(msg);
+      setMsg("");
+    }
+  }
+
   return (
     <Container>
       <div className="button-container">
@@ -43,6 +51,9 @@ export default function ChatInput({ handleSendMsg }) {
         />
         <button type="submit">
           <IoMdSend />
+        </button>
+        <button onClick={(e)=>sendConfession(e)}>
+          <FaUserSecret />
         </button>
       </form>
     </Container>
@@ -130,7 +141,6 @@ const Container = styled.div`
     button {
       padding: 0.3rem 0.5rem;
       border-radius: 2rem;
-      margin-left: 3rem;
       display: flex;
       justify-content: center;
       align-items: center;

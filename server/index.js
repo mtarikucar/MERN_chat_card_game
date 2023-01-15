@@ -3,6 +3,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
 const messageRoutes = require("./routes/messages");
+
 const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
@@ -42,11 +43,15 @@ io.on("connection", (socket) => {
   socket.on("add-user", (userId) => {
     onlineUsers.set(userId, socket.id);
   });
+
+  socket.on('room',(data)=>{
+    socket.join(data)
+})
+
   socket.on("send-msg", (data) => {
+  
+    socket.to(data.room).emit("msg-recieve", data.msg);
     console.log(onlineUsers,data);
-    const sendUserSocket = onlineUsers.get(data.room);
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("msg-recieve", data.msg);
-    }
+  
   });
 });

@@ -14,6 +14,16 @@ const MessageSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
+    isConfession:{
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    isVisible:{
+      type: Boolean,
+      required: true,
+      default: true,
+    }
   },
   {
     timestamps: true,

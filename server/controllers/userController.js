@@ -17,10 +17,16 @@ module.exports.login = async (req, res, next) => {
   }
 };
 
-module.exports.logOut = (req, res, next) => {
+module.exports.logOut = async (req, res, next) => {
   try {
     if (!req.params.id) return res.json({ msg: "User id is required " });
     onlineUsers.delete(req.params.id);
+    /* try{
+      await User.deleteOne({ _id: req.params.id  })
+    }
+    catch(e){
+      console.log(e);
+    } */
     return res.status(200).send();
   } catch (ex) {
     next(ex);

@@ -5,8 +5,7 @@ module.exports.getMessages = async (req, res, next) => {
     const { from, room } = req.body;
 
     const messages = await Messages.find({
-      from,
-      room
+      roomNumber:room
     }).sort({ updatedAt: 1 });
 
     const projectedMessages = messages.map((msg) => {
@@ -23,11 +22,12 @@ module.exports.getMessages = async (req, res, next) => {
 
 module.exports.addMessage = async (req, res, next) => {
   try {
-    const { from, room, message } = req.body;
+    const { from, room, message, isConfession } = req.body;
     const data = await Messages.create({
       message: { text: message },
       roomNumber: room,
       sender: from,
+      isConfession: isConfession
     });
 
     if (data) return res.json({ msg: "Message added successfully." });
@@ -36,3 +36,5 @@ module.exports.addMessage = async (req, res, next) => {
     next(ex);
   }
 };
+
+
