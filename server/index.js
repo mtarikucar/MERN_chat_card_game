@@ -38,20 +38,38 @@ const io = socket(server, {
 });
 
 global.onlineUsers = new Map();
+
 io.on("connection", (socket) => {
   global.chatSocket = socket;
-  socket.on("add-user", (userId) => {
-    onlineUsers.set(userId, socket.id);
+  
+  socket.on("room", (data) => {
+    socket.join(data);
   });
 
-  socket.on('room',(data)=>{
-    socket.join(data)
-})
-
   socket.on("send-msg", (data) => {
+    socket.to(data.room).emit("msg-recieve", data.msg);    
+  });
   
-    socket.to(data.room).emit("msg-recieve", data.msg);
-    console.log(onlineUsers,data);
-  
+
+  socket.on("add-user", (data) => {
+    onlineUsers.set(data._id, {id: socket.id, room: data.room});
+    socket.to(data.room).emit("onlineUsers", [...onlineUsers.values()].filter(user => user.room === data.room));
+    console.log(onlineUsers);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(onlineUsers);
+    let disconnectedUser;
+    onlineUsers.forEach((user, key) => {
+        if(user.id === socket.id){
+          disconnectedUser = user;
+          return;
+        }
+    });
+    if(disconnectedUser){
+      onlineUsers.delete(disconnectedUser.id);
+      socket.to(disconnectedUser.room).emit("onlineUsers", [...onlineUsers.values()].filter(user => user.room === disconnectedUser.room));
+    }
+    console.log(onlineUsers);
   });
 });

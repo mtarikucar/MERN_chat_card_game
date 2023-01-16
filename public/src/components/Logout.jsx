@@ -6,8 +6,9 @@ import axios from "axios";
 import { logoutRoute } from "../utils/APIRoutes";
 
 
-export default function Logout() {
+export default function Logout({socket}) {
   const navigate = useNavigate();
+
   const handleClick = async () => {
     const id = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
@@ -17,6 +18,10 @@ export default function Logout() {
     if (data.status === 200) {
       localStorage.clear();
       navigate("/login");
+      return () => {
+        console.log("çıkış ya tuşuna bastım");
+        socket.current.emit("disconnect");
+      };
     }
   };
   return (

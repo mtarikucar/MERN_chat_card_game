@@ -5,8 +5,21 @@ import Logout from "./Logout";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function ChatContainer({ room, socket, setConfessions }) {
+export default function ChatContainer({ room, socket, users }) {
+  const toastOptions = {
+    position: "bottom-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+  };
+
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
@@ -26,6 +39,7 @@ export default function ChatContainer({ room, socket, setConfessions }) {
     socket.current.emit("room", room)
   },[])
 
+
   const handleSendMsg = async (msg) => {
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
@@ -44,7 +58,7 @@ export default function ChatContainer({ room, socket, setConfessions }) {
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
+    msgs.push({ fromSelf: true, message: msg, isConfession:false });
     setMessages(msgs);
   };
 
@@ -68,12 +82,12 @@ export default function ChatContainer({ room, socket, setConfessions }) {
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
+    msgs.push({ fromSelf: true, message: msg, isConfession: true });
     setMessages(msgs);
+    toast(`itirafın bu mu gerçekten : ${msg}`,toastOptions)
   };
 
   useEffect(() => {
-    console.log("mesaj geldi");
     if (socket.current) {
       socket.current.on("msg-recieve", (msg) => {
         setArrivalMessage({ fromSelf: false, message: msg });
@@ -95,13 +109,21 @@ export default function ChatContainer({ room, socket, setConfessions }) {
         <div className="user-details">
 
           <div className="username">
-            <h3>{room}</h3>
+            <h3>oda: {room}</h3>
+          {
+            users?.map((user => {
+              <div className="user">
+                {user}
+              </div>
+            }))
+          }
           </div>
         </div>
-        <Logout />
+        <Logout socket={socket}/>
       </div>
       <div className="chat-messages">
-        {messages.map((message) => {
+        {
+        messages.filter(message => message.isConfession != true).map((message) => {
           return (
             <div ref={scrollRef} key={uuidv4()}>
               <div
@@ -118,6 +140,7 @@ export default function ChatContainer({ room, socket, setConfessions }) {
         })}
       </div>
       <ChatInput handleSendMsg={handleSendMsg} handleSendConfession={handleSendConfession}/>
+      <ToastContainer/>
     </Container>
   );
 }

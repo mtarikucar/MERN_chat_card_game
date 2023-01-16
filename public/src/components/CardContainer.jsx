@@ -7,18 +7,11 @@ export default function CardContainer({ room, socket }) {
 
   return (
     <Container>
-      <div className="chat-header">
-        <div className="user-details">
 
-          <div className="username">
-            <h3>kartlar</h3>
-          </div>
-        </div>
-        
-      </div>
-      <div className="chat-messages">
-        <Card/>
-      </div>
+        <Card/>   
+        <Card number={"?"}/>  
+    
+
 
     </Container>
   );
@@ -26,7 +19,6 @@ export default function CardContainer({ room, socket }) {
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: 10% 80% 10%;
   border-radius:0.5rem;
   gap: 0.1rem;
   overflow: hidden;

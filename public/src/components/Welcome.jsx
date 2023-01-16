@@ -1,23 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Robot from "../assets/robot.gif";
-export default function Welcome({setCurrentChat}) {
-  const [values, setValues] = useState({});
-  useEffect(async () => {
-    setValues(
-      await JSON.parse(
-        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-      )
-    );
-    
-  }, []);
+export default function Welcome({setEnter,currentUser}) {
+
   return (
     <Container>
       <img src={Robot} alt="" />
       <h1>
-        Hoşgeldin, <span>{values.username}!</span>
+        Hoşgeldin, <span>{currentUser?.username}!</span>
       </h1>
-      <button onClick={()=>setCurrentChat(values.room)}>{values.room} numaralı odaya katıl</button>
+      <button onClick={()=>setEnter(true)}>{currentUser?.room} numaralı odaya katıl</button>
     </Container>
   );
 }

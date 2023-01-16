@@ -1,12 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 
-const Card = () => {
+const Card = ({number}) => {
   const randomNumber = Math.floor(Math.random() * 10);
 
   return (
     <CardContainer>
-      <CardNumber>{randomNumber} ...</CardNumber>
+      <CardNumber>{number ? number: randomNumber} </CardNumber>
     </CardContainer>
   );
 };
@@ -20,6 +20,7 @@ const CardContainer = styled.div`
   background-color: #f5f5f5;
   padding: 20px;
   text-align: center;
+  margin: 0.5rem;
 `;
 
 const CardNumber = styled.div`
