@@ -8,7 +8,7 @@ import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ChatContainer({ room, socket, users }) {
+export default function ChatContainer({ currentUser, socket }) {
   const toastOptions = {
     position: "bottom-center",
     autoClose: 5000,
@@ -25,20 +25,19 @@ export default function ChatContainer({ room, socket, users }) {
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
   useEffect(async () => {
+    
+
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
     const response = await axios.post(recieveMessageRoute, {
       from: data._id,
-      room: room,
+      room: currentUser.room,
     });
     setMessages(response.data);
-  }, [room]);
+  }, [currentUser.room]);
 
-  useEffect(async () =>{
-    socket.current.emit("room", room)
-  },[])
-
+  //burda local storage'dan oda değiştirme bug'ı bıraktım bilerek ilerde kullanırız kral :)
 
   const handleSendMsg = async (msg) => {
     const data = await JSON.parse(
@@ -46,8 +45,9 @@ export default function ChatContainer({ room, socket, users }) {
     );
 
     socket.current.emit("send-msg", {
-      room: room,
+      room: currentUser.room,
       from: data._id,
+  
       msg,
     });
     await axios.post(sendMessageRoute, {
@@ -63,16 +63,10 @@ export default function ChatContainer({ room, socket, users }) {
   };
 
   const handleSendConfession = async (msg) => {
-    console.log("bu bir itiraf");
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
 
-    socket.current.emit("send-msg", {
-      room: room,
-      from: data._id,
-      msg,
-    });
 
     await axios.post(sendMessageRoute, {
       from: data._id,
@@ -109,14 +103,7 @@ export default function ChatContainer({ room, socket, users }) {
         <div className="user-details">
 
           <div className="username">
-            <h3>oda: {room}</h3>
-          {
-            users?.map((user => {
-              <div className="user">
-                {user}
-              </div>
-            }))
-          }
+            <h3>oda: {currentUser.room}</h3>
           </div>
         </div>
         <Logout socket={socket}/>
@@ -131,6 +118,9 @@ export default function ChatContainer({ room, socket, users }) {
                   message.fromSelf ? "sended" : "recieved"
                 }`}
               >
+                <div className="username">
+                <p>{message.id}</p>
+                </div>
                 <div className="content ">
                   <p>{message.message}</p>
                 </div>

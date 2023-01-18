@@ -42,19 +42,16 @@ module.exports.updateVisibility = async (req, res, next) => {
   try {
     const { from, room } = req.body;
 
-    const messages = await Messages.find({
+    const message = await Messages.find({
       from: from,
       roomNumber:room,
       isConfession: true,
     }).sort({created_at: -1});
-
-    const projectedMessages = messages.map((msg) => {
-      return {
-        fromSelf: msg.sender.toString() === from,
-        message: msg.message.text,
-      };
-    });
-    res.json(projectedMessages);
+    
+    message.updateOne({
+      isVisible: true
+    })
+    res.json(message);
   } catch (ex) {
     next(ex);
   }

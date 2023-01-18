@@ -9,6 +9,8 @@ import { loginRoute } from "../utils/APIRoutes";
 export default function Login() {
   const navigate = useNavigate();
   const [values, setValues] = useState({ username: "", Room: "" });
+
+
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
@@ -57,6 +59,7 @@ export default function Login() {
       }
     }
   };
+  
 
   return (
     <>
@@ -65,19 +68,19 @@ export default function Login() {
           <span>____________________________________</span>
           <input
             type="text"
-            placeholder="Username"
+            placeholder="isim"
             name="username"
             onChange={(e) => handleChange(e)}
             min="3"
           />
           <input
             type="Room"
-            placeholder="Room"
+            placeholder="oda numarası"
             name="room"
             onChange={(e) => handleChange(e)}
             accept="number"
           />
-          <button type="submit">Log In</button>
+          <button type="submit">Giriş Yap</button>
           <span>____________________________________</span>
         </form>
       </FormContainer>

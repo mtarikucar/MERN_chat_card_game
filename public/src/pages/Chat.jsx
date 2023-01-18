@@ -6,14 +6,26 @@ import { host, roomMatesRoute } from "../utils/APIRoutes";
 import ChatContainer from "../components/ChatContainer";
 import Welcome from "../components/Welcome";
 import GameContainer from "../components/GameContainer";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 
 export default function Chat() {
+  const toastOptions = {
+    position: "bottom-center",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+  };
   const navigate = useNavigate();
   const socket = useRef();
 
-  const [users, setUsers] = useState([]);
-  const [enter,setEnter] = useState(false)
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const [enter, setEnter] = useState(false);
   const [startGame, setStartGame] = useState(false);
   const [currentUser, setCurrentUser] = useState(undefined);
   useEffect(async () => {
@@ -31,34 +43,60 @@ export default function Chat() {
   useEffect(async () => {
     if (currentUser) {
       socket.current = io(host);
+      socket.current.emit("room", currentUser.room);
       socket.current.emit("add-user", currentUser);
       const roomMates = await axios.get(
         roomMatesRoute + `/${currentUser.room}`
       );
-      setUsers(roomMates.data.roomMates);
+      setOnlineUsers(roomMates.data.roomMates);
     }
+
   }, [currentUser]);
 
+  useEffect(  () => {
+    if (socket.current) {
+      socket.current.on("onlineUsers", async(data) => {
+        const roomMates = await axios.get(
+          roomMatesRoute + `/${currentUser.room}`
+        );
+        setOnlineUsers(roomMates.data.roomMates);
+      });
+    }
+  }, [socket.current]);
+  
+  useEffect(()=>{
+    console.log(onlineUsers);
+    toast("biri girdi veya çıktı");
+  },[onlineUsers])
+  
   return (
     <>
       <Container>
         <div className="container">
           {enter === false ? (
             <Welcome setEnter={setEnter} currentUser={currentUser} />
-          ) : (
+            ) : (
             <>
               {startGame ? (
                 <GameContainer room={currentUser.room} socket={socket} />
-              ) : (
-                <button id="start" onClick={() => setStartGame(!startGame)}>
-                  oyuna gir
+                ) : (
+                  <button id="start" onClick={() => setStartGame(!startGame)}>
+                  oyuna girmek için bir itiraf gönder ve herkesin itiraf
+                  göndermesini bekle
+                  {onlineUsers.map((user, key) => (
+                    <p key={key} className="user">
+                      {user.username}
+                    </p>
+                  ))}
+                  
                 </button>
               )}
-              <ChatContainer room={currentUser.room} socket={socket} users={users} />
+              <ChatContainer currentUser={currentUser} socket={socket} />
             </>
           )}
         </div>
       </Container>
+      <ToastContainer />
     </>
   );
 }
@@ -102,3 +140,4 @@ const Container = styled.div`
     display: grid;
   }
 `;
+
