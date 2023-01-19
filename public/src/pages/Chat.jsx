@@ -28,6 +28,9 @@ export default function Chat() {
   const [enter, setEnter] = useState(false);
   const [startGame, setStartGame] = useState(false);
   const [currentUser, setCurrentUser] = useState(undefined);
+  const [confessors, setConfessors] = useState([])
+  const [messages, setMessages] = useState([]);
+  
   useEffect(async () => {
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/login");
@@ -69,6 +72,20 @@ export default function Chat() {
     toast("biri girdi veya çıktı");
   },[onlineUsers])
   
+  const checkConfessors=()=>{
+    const markedUsers = messages
+  .filter(message => message.isConfession === true)
+   .map(message => onlineUsers.find(user => user.username === message.username)?.username)
+  .filter((user, index, self) => self.indexOf(user) === index);
+  setConfessors(markedUsers)
+  console.log(markedUsers);
+    
+  }
+  const handleGameStart = () => {
+    setStartGame(!startGame)
+    console.log(messages);
+    checkConfessors()
+  }
   return (
     <>
       <Container>
@@ -80,10 +97,10 @@ export default function Chat() {
               {startGame ? (
                 <GameContainer room={currentUser.room} socket={socket} />
                 ) : (
-                  <button id="start" onClick={() => setStartGame(!startGame)}>
+                  <button id="start" onClick={handleGameStart}>
                   oyuna girmek için bir itiraf gönder ve herkesin itiraf
                   göndermesini bekle
-                  {onlineUsers.map((user, key) => (
+                  {confessors.map((user, key) => (
                     <p key={key} className="user">
                       {user.username}
                     </p>
@@ -91,7 +108,7 @@ export default function Chat() {
                   
                 </button>
               )}
-              <ChatContainer currentUser={currentUser} socket={socket} />
+              <ChatContainer currentUser={currentUser} socket={socket} messages={messages} setMessages={setMessages}/>
             </>
           )}
         </div>

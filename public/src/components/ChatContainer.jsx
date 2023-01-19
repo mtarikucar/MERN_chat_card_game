@@ -8,7 +8,12 @@ import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function ChatContainer({ currentUser, socket }) {
+export default function ChatContainer({
+  setMessages,
+  messages,
+  currentUser,
+  socket,
+}) {
   const toastOptions = {
     position: "bottom-center",
     autoClose: 5000,
@@ -20,13 +25,10 @@ export default function ChatContainer({ currentUser, socket }) {
     theme: "dark",
   };
 
-  const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
   useEffect(async () => {
-    
-
     const data = await JSON.parse(
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
@@ -47,18 +49,18 @@ export default function ChatContainer({ currentUser, socket }) {
     socket.current.emit("send-msg", {
       room: currentUser.room,
       from: data._id,
-  
       msg,
     });
     await axios.post(sendMessageRoute, {
       from: data._id,
       room: data.room,
       message: msg,
-      isConfession: false
+      isConfession: false,
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg, isConfession:false });
+    msgs.push({ fromSelf: true, message: msg, isConfession: false });
+
     setMessages(msgs);
   };
 
@@ -67,18 +69,19 @@ export default function ChatContainer({ currentUser, socket }) {
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
 
-
     await axios.post(sendMessageRoute, {
       from: data._id,
       room: data.room,
       message: msg,
-      isConfession: true
+      isConfession: true,
     });
 
     const msgs = [...messages];
     msgs.push({ fromSelf: true, message: msg, isConfession: true });
+
     setMessages(msgs);
-    toast(`itirafın bu mu gerçekten : ${msg}`,toastOptions)
+
+    toast(`itirafın bu mu gerçekten : ${msg}`, toastOptions);
   };
 
   useEffect(() => {
@@ -101,36 +104,39 @@ export default function ChatContainer({ currentUser, socket }) {
     <Container>
       <div className="chat-header">
         <div className="user-details">
-
-          <div className="username">
+          <div className="room">
             <h3>oda: {currentUser.room}</h3>
           </div>
         </div>
-        <Logout socket={socket}/>
+        <Logout socket={socket} />
       </div>
       <div className="chat-messages">
-        {
-        messages.filter(message => message.isConfession != true).map((message) => {
-          return (
-            <div ref={scrollRef} key={uuidv4()}>
-              <div
-                className={`message ${
-                  message.fromSelf ? "sended" : "recieved"
-                }`}
-              >
-                <div className="username">
-                <p>{message.id}</p>
-                </div>
-                <div className="content ">
-                  <p>{message.message}</p>
+        {messages
+          .filter((message) => message.isConfession != true)
+          .map((message) => {
+            return (
+              <div ref={scrollRef} key={uuidv4()}>
+                <div
+                  className={`message ${
+                    message.fromSelf ? "sended" : "recieved"
+                  }`}
+                >
+                  <div className="content ">
+                    <div className="username">
+                      <p>{message.username}</p>
+                    </div>
+                    <p>{message.message}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
-      <ChatInput handleSendMsg={handleSendMsg} handleSendConfession={handleSendConfession}/>
-      <ToastContainer/>
+      <ChatInput
+        handleSendMsg={handleSendMsg}
+        handleSendConfession={handleSendConfession}
+      />
+      <ToastContainer />
     </Container>
   );
 }
@@ -138,12 +144,11 @@ export default function ChatContainer({ currentUser, socket }) {
 const Container = styled.div`
   display: grid;
   grid-template-rows: 10% 80% 10%;
-  border-radius:0.5rem;
+  border-radius: 0.5rem;
   gap: 0.1rem;
   overflow: hidden;
 
   .chat-header {
-    
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -153,10 +158,11 @@ const Container = styled.div`
       align-items: center;
       gap: 1rem;
 
-      .username {
-        h3 {
-          color: white;
+      .room{
+        h3{
+          color:white;
         }
+      }
       }
     }
   }
@@ -177,6 +183,9 @@ const Container = styled.div`
     .message {
       display: flex;
       align-items: center;
+
+      
+      
       .content {
         max-width: 40%;
         overflow-wrap: break-word;
@@ -184,16 +193,22 @@ const Container = styled.div`
         font-size: 1.1rem;
         border-radius: 1rem;
         color: #d1d1d1;
-
+        .username {
+          margin-bottom:0.5rem;   
+            color: white;
+            font-size:0.7rem;
+        }
       }
     }
     .sended {
+      
       justify-content: flex-end;
       .content {
         background-color: #4f04ff21;
       }
     }
     .recieved {
+      
       justify-content: flex-start;
       .content {
         background-color: #9900ff20;
