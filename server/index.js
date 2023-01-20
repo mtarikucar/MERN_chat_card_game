@@ -47,11 +47,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send-msg", (data) => {
-    socket.to(data.room).emit("msg-recieve", data.msg);
+    socket.to(data.room).emit("msg-recieve", data);
   });
 
   socket.on("add-user", (data) => {
-    onlineUsers.set(data._id, { id: socket.id, room: data.room, name:data.username });
+    onlineUsers.set(data._id, { id: socket.id, room: data.room });
     socket.to(data.room).emit(
       "onlineUsers",
       [...onlineUsers.values()].filter((user) => user.room === data.room)

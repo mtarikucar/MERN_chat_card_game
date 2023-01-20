@@ -4,7 +4,7 @@ import ChatInput from "./ChatInput";
 import Logout from "./Logout";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
+import { sendMessageRoute } from "../utils/APIRoutes";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -12,10 +12,10 @@ export default function ChatContainer({
   setMessages,
   messages,
   currentUser,
-  socket,
+  socket
 }) {
   const toastOptions = {
-    position: "bottom-center",
+    position: "bottom-right",
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,
@@ -28,18 +28,10 @@ export default function ChatContainer({
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
-  useEffect(async () => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    const response = await axios.post(recieveMessageRoute, {
-      from: data._id,
-      room: currentUser.room,
-    });
-    setMessages(response.data);
-  }, [currentUser.room]);
 
-  //burda local storage'dan oda değiştirme bug'ı bıraktım bilerek ilerde kullanırız kral :)
+
+  //burda local storage'dan oda değiştirme bug'ı bıraktım bilerek ilerde kullanırız kral :) 
+  //useEffect ile room değşirse kontrolü ile buugı kontrol edebilirdin ama kaldırdıım :)
 
   const handleSendMsg = async (msg) => {
     const data = await JSON.parse(
@@ -47,9 +39,10 @@ export default function ChatContainer({
     );
 
     socket.current.emit("send-msg", {
-      room: currentUser.room,
-      from: data._id,
-      msg,
+      room: data.room,
+      from: data.username,
+      message: msg,
+      isConfession: false,
     });
     await axios.post(sendMessageRoute, {
       from: data._id,
@@ -59,9 +52,10 @@ export default function ChatContainer({
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg, isConfession: false });
+    msgs.push({ fromSelf: true, message: msg, isConfession: false ,username:data.username});
 
     setMessages(msgs);
+    
   };
 
   const handleSendConfession = async (msg) => {
@@ -69,6 +63,12 @@ export default function ChatContainer({
       localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
     );
 
+    socket.current.emit("send-msg", {
+      room: data.room,
+      from: data.username,
+      message: msg,
+      isConfession: true,
+    });
     await axios.post(sendMessageRoute, {
       from: data._id,
       room: data.room,
@@ -77,7 +77,7 @@ export default function ChatContainer({
     });
 
     const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg, isConfession: true });
+    msgs.push({ fromSelf: true, message: msg, isConfession: true, username:data.username });
 
     setMessages(msgs);
 
@@ -86,8 +86,8 @@ export default function ChatContainer({
 
   useEffect(() => {
     if (socket.current) {
-      socket.current.on("msg-recieve", (msg) => {
-        setArrivalMessage({ fromSelf: false, message: msg });
+      socket.current.on("msg-recieve", (data) => {
+        setArrivalMessage({ fromSelf: false, message: data.message, username: data.from ,isConfession: data.isConfession, marked:data.marked});
       });
     }
   }, [socket.current]);
@@ -118,14 +118,15 @@ export default function ChatContainer({
               <div ref={scrollRef} key={uuidv4()}>
                 <div
                   className={`message ${
-                    message.fromSelf ? "sended" : "recieved"
+                    message.fromSelf  ? "sended" : "recieved"
                   }`}
                 >
-                  <div className="content ">
+                  <div className={`${message.marked ? "marked": "content"}`}>
                     <div className="username">
                       <p>{message.username}</p>
                     </div>
                     <p>{message.message}</p>
+                    
                   </div>
                 </div>
               </div>
@@ -186,6 +187,19 @@ const Container = styled.div`
 
       
       
+      .marked{
+        max-width: 40%;
+        overflow-wrap: break-word;
+        padding: 1rem;
+        font-size: 1.1rem;
+        border-radius: 1rem;
+        color: #FFC000;
+        .username {
+          margin-bottom:0.5rem;   
+            color: white;
+            font-size:0.7rem;
+        }
+      }
       .content {
         max-width: 40%;
         overflow-wrap: break-word;

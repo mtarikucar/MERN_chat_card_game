@@ -5,8 +5,7 @@ import Decision from "./Decision";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
-export default function GameContainer({currentChat,socket}) {
+export default function GameContainer({ setResult }) {
   const toastOptions = {
     position: "bottom-center",
     autoClose: 5000,
@@ -19,20 +18,28 @@ export default function GameContainer({currentChat,socket}) {
   };
 
   const [decision, setDecision] = useState(undefined);
+  const [number, setNumber] = useState(undefined);
 
   useEffect(() => {
-    if (decision === undefined) {
-      toast(`🦄 sıradaki kart için tahminini yap`, toastOptions);
-    } else {
+    if (decision) {
       toast(
         `🦄 sıradaki kart için tahminin ${
           decision === "up" ? "büyük" : "küçük"
         }`,
         toastOptions
       );
+      let newNumber = Math.floor(Math.random() * 11);
+      newNumber = newNumber === number ? newNumber - 1 : newNumber;
+      const result = newNumber - number > 0 ? "up" : "down";
+      if (result === decision) {
+        setResult("correct");
+        toast(`doğru bildin sıradaki rakam ${newNumber}'dı`)
+      } else {
+        setResult("wrong");
+        toast(`yanlış bildin sıradaki rakam ${newNumber}'dı`)
+      }
     }
   }, [decision]);
-
 
   return (
     <Container decision={decision}>
@@ -40,7 +47,7 @@ export default function GameContainer({currentChat,socket}) {
         <h3>Oyun</h3>
       </div>
       <div className="game-cards">
-        <CardContainer />
+        <CardContainer number={number} setNumber={setNumber} />
       </div>
       <div className="decision">
         {!decision && (

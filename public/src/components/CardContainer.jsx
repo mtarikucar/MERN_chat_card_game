@@ -1,84 +1,53 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import ChatInput from "./ChatInput";
-import Card from "./Card";
 
-export default function CardContainer({ room, socket }) {
+export default function CardContainer({number, setNumber}) {
+  
+
+  useEffect(() => {
+    setNumber(Math.floor(Math.random() * 6) + 3);
+  }, []);
 
   return (
     <Container>
+      <Card>
+        <div className="text">
+          {number}
+        </div>
+      </Card>
 
-        <Card/>   
-        <Card number={"?"}/>  
-    
-
-
+      <Card>
+        <div className="text">
+          sıradaki kart sence üstteki rakamdan büyük mü küçük mü?
+        </div>
+      </Card>
     </Container>
   );
 }
 
 const Container = styled.div`
   display: grid;
-  border-radius:0.5rem;
+  border-radius: 0.5rem;
   gap: 0.1rem;
   overflow: hidden;
+`;
 
-  .chat-header {
-    
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 2rem;
-    .user-details {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-
-      .username {
-        h3 {
-          color: white;
-        }
-      }
-    }
+const Card = styled.div`
+  display: grid;
+  grid-template-columns: 100%;
+  border-radius: 0.5rem;
+  background-color: #f5f5f5;
+  padding: 20px;
+  text-align: center;
+  margin: 0.5rem;
+  .number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #333;
   }
-  .chat-messages {
-    padding: 1rem 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    overflow: auto;
-    &::-webkit-scrollbar {
-      width: 0.2rem;
-      &-thumb {
-        background-color: #ffffff39;
-        width: 0.1rem;
-        border-radius: 1rem;
-      }
-    }
-    .message {
-      display: flex;
-      align-items: center;
-      .content {
-        max-width: 40%;
-        overflow-wrap: break-word;
-        padding: 1rem;
-        font-size: 1.1rem;
-        border-radius: 1rem;
-        color: #d1d1d1;
-
-      }
-    }
-    .sended {
-      justify-content: flex-end;
-      .content {
-        background-color: #4f04ff21;
-      }
-    }
-    .recieved {
-      justify-content: flex-start;
-      .content {
-        background-color: #9900ff20;
-      }
-    }
+  .text {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
   }
 `;
